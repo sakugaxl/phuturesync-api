@@ -17,6 +17,7 @@
     "firebase-admin": "^12.7.0",
     "googleapis": "^144.0.0",
     "install": "^0.13.0",
-    "npm": "^10.9.1"
+    "npm": "^10.9.1",
+    "serverless-http": "^3.2.0"
   }
 }
