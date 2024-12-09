@@ -27,3 +27,5 @@ notes/
 node_modules
 .vercel
 serviceAccountKey.json
+# Local Netlify folder
+.netlify

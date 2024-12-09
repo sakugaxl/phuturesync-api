@@ -1,23 +1,25 @@
-// Firebase Admin Setup for Firestore
-const admin = require("firebase-admin");
-const serviceAccount = require("./serviceAccountKey.json");
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+const authRoutes = require('./netlify/functions/auth');
 
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
 const app = express();
+const port = process.env.PORT || 5000;
 
-app.use(cors({ origin: "https://www.phuturesync.co.za" })); // Updated to production URL
+// Middlewares
+app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/auth', authRoutes);
 
-// Start the Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on https://panel.phuturesync.co.za:${PORT}`);
+// Base server response
+app.get('/', (req, res) => {
+  res.send('Server is running.');
+});
+
+// Launch server
+app.listen(port, () => {
+  console.log(`Server running at https://api.phuturesync.co.za:${port}`);
 });
