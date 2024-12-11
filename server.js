@@ -5,21 +5,17 @@ const admin = require("firebase-admin");
 
 let serviceAccount;
 
-// Check for environment variable or fallback to local file for development
-if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+// Check for the FIREBASE_SERVICE_ACCOUNT environment variable
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   } catch (error) {
-    console.error("Error parsing FIREBASE_SERVICE_ACCOUNT_KEY:", error);
-    process.exit(1); // Exit if the environment variable is improperly formatted
+    console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT:", error.message);
+    process.exit(1); // Exit if the environment variable is not properly formatted
   }
 } else {
-  try {
-    serviceAccount = require("./serviceAccountKey.json");
-  } catch (error) {
-    console.error("Missing serviceAccountKey.json file and environment variable.");
-    process.exit(1);
-  }
+  console.error("FIREBASE_SERVICE_ACCOUNT environment variable is missing.");
+  process.exit(1);
 }
 
 // Initialize Firebase Admin SDK
