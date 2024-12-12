@@ -1,11 +1,15 @@
 require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const { db } = require("./utils/firebase");
+const { initializeFirebaseApp } = require("./utils/firebase");
+const PORT = process.env.PORT || 4040;
 
 const app = express();
-app.use(cors({ origin: "https://www.phuturesync.co.za" }));
 app.use(express.json());
+app.use(cors({ origin: "https://www.phuturesync.co.za" }));
+
+initializeFirebaseApp();
 
 // Import Routes
 const authRoutes = require("./routes/auth");
@@ -18,10 +22,7 @@ app.get("/", (req, res) => {
   res.send("Server is running on api.phuturesync.co.za");
 });
 
-// Debug the key before the server starts
-console.log("FIREBASE_SERVICE_ACCOUNT_KEY loaded successfully.");
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://api.phuturesync.co.za:${PORT}`);
+app.listen(PORT, (err) => {
+  if (err) console.error(err);
+  console.log("Server is running on PORT", PORT);
 });

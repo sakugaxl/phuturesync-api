@@ -1,7 +1,9 @@
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
-const { db } = require("../utils/firebase");
+const { getFirestoreDb } = require("../utils/firebase");
+
+const firestoreDb = getFirestoreDb();
 
 // Helper to handle long-lived tokens for Facebook
 async function exchangeForLongLivedToken(accessToken, appId, appSecret) {
@@ -36,7 +38,6 @@ router.get("/facebook/callback", async (req, res) => {
   const { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_REDIRECT_URI, FRONTEND_URL } = process.env;
 
   try {
-    // Step 1: Exchange code for short-lived access token
     const tokenResponse = await axios.get(
       `https://graph.facebook.com/v14.0/oauth/access_token`,
       {
@@ -49,15 +50,12 @@ router.get("/facebook/callback", async (req, res) => {
       }
     );
     const { access_token } = tokenResponse.data;
-
-    // Step 2: Exchange short-lived token for long-lived token
     const longLivedToken = await exchangeForLongLivedToken(
       access_token,
       FACEBOOK_APP_ID,
       FACEBOOK_APP_SECRET
     );
 
-    // Step 3: Fetch user accounts associated with the access token
     const accountsResponse = await axios.get(
       `https://graph.facebook.com/v14.0/me/accounts`,
       {
@@ -70,8 +68,10 @@ router.get("/facebook/callback", async (req, res) => {
     const accounts = accountsResponse.data.data;
     const userId = req.query.userId || "testUserId";
 
-    // Step 4: Save token and accounts to Firebase
-    await db.collection("users").doc(userId).set(
+    // Save token and accounts to Firestore
+    const userRef = doc(firestoreDb, "users", userId);
+    await setDoc(
+      userRef,
       {
         socialAccounts: {
           facebook: {
@@ -88,20 +88,18 @@ router.get("/facebook/callback", async (req, res) => {
   } catch (error) {
     console.error("Error connecting to Facebook:", error.response?.data || error.message);
     res.redirect(
-      `${FRONTEND_URL}/auth-failure?platform=facebook&message=${encodeURIComponent(
-        error.message
-      )}`
+      `${FRONTEND_URL}/auth-failure?platform=facebook&message=${encodeURIComponent(error.message)}`
     );
   }
 });
 
-// Check connection status
 router.get("/facebook/status", async (req, res) => {
   try {
     const userId = req.query.userId || "testUserId";
-    const userDoc = await db.collection("users").doc(userId).get();
+    const userRef = doc(firestoreDb, "users", userId);
+    const userDoc = await getDocs(userRef);
 
-    if (userDoc.exists) {
+    if (userDoc.exists()) {
       const facebookAccount = userDoc.data()?.socialAccounts?.facebook;
       res.json({ isConnected: !!facebookAccount?.connected });
     } else {

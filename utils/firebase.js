@@ -1,26 +1,38 @@
-const admin = require("firebase-admin");
+// Import necessary Firebase modules
+const { initializeApp } = require("firebase/app");
+const { getFirestore, doc, setDoc, collection, getDocs, query, where } = require("firebase/firestore");
+const { errorHandler } = require("./helpers");
 
-if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-  console.error("FIREBASE_SERVICE_ACCOUNT_KEY is missing.");
-  process.exit(1);
-}
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGE_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+};
 
-let serviceAccount;
+let app;
+let firestoreDb;
 
-try {
-  // Replace escaped newlines with actual newlines
-  const formattedKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY.replace(/\\n/g, "\n");
-  serviceAccount = JSON.parse(formattedKey);
-} catch (error) {
-  console.error("Error parsing FIREBASE_SERVICE_ACCOUNT_KEY:", error);
-  process.exit(1);
-}
+// Initialize Firebase
+const initializeFirebaseApp = () => {
+  try {
+    if (!app) {
+      app = initializeApp(firebaseConfig);
+      firestoreDb = getFirestore();
+    }
+  } catch (error) {
+    errorHandler(error, "firebase-initializeFirebaseApp");
+  }
+};
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
+const getFirebaseApp = () => app;
+const getFirestoreDb = () => firestoreDb;
 
-const db = admin.firestore();
-module.exports = { db };
+module.exports = {
+  initializeFirebaseApp,
+  getFirebaseApp,
+  getFirestoreDb,
+};
