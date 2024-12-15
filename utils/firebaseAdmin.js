@@ -1,4 +1,4 @@
-require('dotenv').config(); // Ensure env vars are loaded
+require('dotenv').config();
 const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
@@ -8,7 +8,7 @@ if (!admin.apps.length) {
     });
     console.log("✅ Firebase Admin initialized using Application Default Credentials.");
   } catch (error) {
-    console.error("❌ Failed to initialize Firebase Admin using default credentials:", error.message);
+    console.error("❌ Failed to initialize Firebase Admin:", error.message);
     throw new Error("Failed to initialize Firebase Admin.");
   }
 } else {
