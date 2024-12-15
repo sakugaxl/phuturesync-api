@@ -1,6 +1,6 @@
-// Import necessary Firebase modules
+// utils/firebase.js
 const { initializeApp } = require("firebase/app");
-const { getFirestore, doc, setDoc, collection, getDocs, query, where } = require("firebase/firestore");
+const { getFirestore } = require("firebase/firestore");
 const { errorHandler } = require("./helpers");
 
 const firebaseConfig = {
@@ -16,7 +16,6 @@ const firebaseConfig = {
 let app;
 let firestoreDb;
 
-// Initialize Firebase
 const initializeFirebaseApp = () => {
   try {
     if (!app) {

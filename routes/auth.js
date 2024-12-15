@@ -1,11 +1,11 @@
+// auth.js
+
 // Import required modules
 const express = require("express");
 const axios = require("axios");
-const { doc, setDoc, getDoc } = require("firebase/firestore");
-const { getFirestoreDb } = require("../utils/firebase");
+const { db } = require("../utils/firebaseAdmin");
 
 const router = express.Router();
-const firestoreDb = getFirestoreDb();
 
 // Helper to exchange short-lived token for long-lived token
 async function exchangeForLongLivedToken(accessToken, appId, appSecret) {
@@ -41,9 +41,10 @@ router.get("/facebook/callback", async (req, res) => {
   const { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_REDIRECT_URI, FRONTEND_URL } = process.env;
 
   try {
-    // Step 1: Exchange code for a short-lived token
+    // Step 1: Exchange code for short-lived access token
+    console.log("Attempting to exchange code for access token...");
     const tokenResponse = await axios.get(
-      `https://graph.facebook.com/v21.0/oauth/access_token`,
+      `https://graph.facebook.com/v21.0/oauth_access_token`,
       {
         params: {
           client_id: FACEBOOK_APP_ID,
@@ -53,30 +54,38 @@ router.get("/facebook/callback", async (req, res) => {
         },
       }
     );
+    console.log("Token response:", tokenResponse.data);
 
     const { access_token } = tokenResponse.data;
 
-    // Step 2: Exchange for a long-lived token
+    // Step 2: Exchange short-lived token for long-lived token
+    console.log("Exchanging short-lived token for long-lived token...");
     const longLivedToken = await exchangeForLongLivedToken(
       access_token,
       FACEBOOK_APP_ID,
       FACEBOOK_APP_SECRET
     );
+    console.log("Long-lived token acquired:", longLivedToken);
 
-    // Step 3: Fetch connected accounts
+    // Step 3: Fetch user accounts associated with the access token
+    console.log("Fetching user accounts...");
     const accountsResponse = await axios.get(
       `https://graph.facebook.com/v21.0/me/accounts`,
       {
-        headers: { Authorization: `Bearer ${longLivedToken}` },
+        headers: {
+          Authorization: `Bearer ${longLivedToken}`,
+        },
       }
     );
-    const accounts = accountsResponse.data.data;
+    console.log("Accounts response:", accountsResponse.data);
 
-    // Step 4: Save data to Firestore
+    const accounts = accountsResponse.data.data;
     const userId = req.query.userId || "testUserId";
-    const userRef = doc(firestoreDb, "users", userId);
-    await setDoc(
-      userRef,
+
+    // Save token and accounts to Firestore using Admin SDK
+    console.log("Saving to Firestore...");
+    const userRef = db.collection("users").doc(userId);
+    await userRef.set(
       {
         socialAccounts: {
           facebook: {
@@ -88,11 +97,14 @@ router.get("/facebook/callback", async (req, res) => {
       },
       { merge: true }
     );
+    console.log("Data saved successfully!");
 
     res.redirect(`${FRONTEND_URL}/auth-success?platform=facebook`);
   } catch (error) {
     console.error("Error during Facebook callback:", error.response?.data || error.message);
-    res.redirect(`${FRONTEND_URL}/auth-failure?platform=facebook&message=${encodeURIComponent(error.message)}`);
+    res.redirect(
+      `${FRONTEND_URL}/auth-failure?platform=facebook&message=${encodeURIComponent(error.message)}`
+    );
   }
 });
 
@@ -100,11 +112,11 @@ router.get("/facebook/callback", async (req, res) => {
 router.get("/facebook/status", async (req, res) => {
   try {
     const userId = req.query.userId || "testUserId";
-    const userRef = doc(firestoreDb, "users", userId);
-    const userDoc = await getDoc(userRef);
+    const userRef = db.collection("users").doc(userId);
+    const userSnap = await userRef.get();
 
-    if (userDoc.exists()) {
-      const facebookAccount = userDoc.data()?.socialAccounts?.facebook;
+    if (userSnap.exists) {
+      const facebookAccount = userSnap.data()?.socialAccounts?.facebook;
       res.json({ isConnected: !!facebookAccount?.connected });
     } else {
       res.json({ isConnected: false });
