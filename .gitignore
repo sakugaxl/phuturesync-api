@@ -1,4 +1,5 @@
 # Logs
+keyfile.txt
 .env
 logs
 *.log
