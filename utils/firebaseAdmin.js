@@ -2,8 +2,15 @@
 const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
-  const decodedKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64').toString('utf-8');
-  
+  const base64Key = process.env.FIREBASE_PRIVATE_KEY_BASE64;
+
+  if (!base64Key) {
+    console.error("❌ Missing FIREBASE_PRIVATE_KEY_BASE64 environment variable.");
+    throw new Error("FIREBASE_PRIVATE_KEY_BASE64 is not set in the environment.");
+  }
+
+  const decodedKey = Buffer.from(base64Key, 'base64').toString('utf-8');
+
   admin.initializeApp({
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
