@@ -10,6 +10,5 @@ if (!admin.apps.length) {
     }),
   });
 }
-console.log('🔥 FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY);
 const db = admin.firestore();
 module.exports = { db };
