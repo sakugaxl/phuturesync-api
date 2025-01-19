@@ -1,23 +1,22 @@
 {
-  "name": "phuturesync-api",
+  "name": "phuture-backend",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "nodemon server.js",
     "build": "echo 'No build step required for backend'",
     "start": "node server.js"
   },
   "dependencies": {
-    "axios": "^1.7.9",
-    "body-parser": "^1.20.3",
+    "axios": "^1.7.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "firebase": "^11.0.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "firebase": "^11.0.1",
     "firebase-admin": "^12.7.0",
     "googleapis": "^144.0.0",
     "install": "^0.13.0",
-    "npm": "^10.9.1",
-    "serverless-http": "^3.2.0"
+    "nodemon": "^3.1.9",
+    "npm": "^10.9.1"
   }
 }
