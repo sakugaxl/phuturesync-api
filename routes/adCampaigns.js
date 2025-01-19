@@ -1,3 +1,2 @@
 // Empty File
-
-module.exports = router;
+module.exports = {};
