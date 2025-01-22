@@ -5,7 +5,7 @@ async function handler(req, method) {
     try {
         if (method === "GET") {
             const path = req.path;
-            const testUrl = "http://localhost:3000/api/test";
+            const testUrl = "http://api.phuturesync.co.za/api/test";
             if (path === "/test") {
                 const data = await processTheCollection(testUrl);
                 return JSON.stringify(data);

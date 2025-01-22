@@ -24,11 +24,11 @@ app.use("/api/insights", insightsRoutes);
 
 // Root Route
 app.get("/", (req, res) => {
-  res.send("Server is running on panel.phuturesync.co.za");
+  res.send("Server is running on api.phuturesync.co.za");
 });
 
 // Start the Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on https://panel.phuturesync.co.za:${PORT}`);
+  console.log(`Server is running on https://api.phuturesync.co.za:${PORT}`);
 });
