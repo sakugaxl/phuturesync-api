@@ -24,8 +24,14 @@ app.use("/api/insights", insightsRoutes);
 
 // Root Route
 app.get("/", (req, res) => {
-  res.send("Server is running on panel.phuturesync.co.za");
+  res.json({
+    status: "online",
+    message: "PhutureSync API is running",
+    version: "1.0.0"
+  });
 });
+
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Start the Server
 const PORT = process.env.PORT || 5000;
