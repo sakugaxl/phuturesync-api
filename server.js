@@ -36,5 +36,5 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 // Start the Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on https://panel.phuturesync.co.za:${PORT}`);
+  console.log(`Server is running on https://api.phuturesync.co.za:${PORT}`);
 });
