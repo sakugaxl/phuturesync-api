@@ -13,7 +13,7 @@ const getInsights = async (accessToken, platform) => {
     const metrics = ['page_impressions', 'page_engaged_users', 'reach']; // Example metrics
 
     if (platform === 'facebook') {
-      url = `https://graph.facebook.com/v14.0/me/insights`;
+      url = `https://graph.facebook.com/v22.0/me/insights`;
     } else if (platform === 'instagram') {
       url = `https://graph.instagram.com/me/insights`;
     }

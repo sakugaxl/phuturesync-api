@@ -9,7 +9,7 @@ const { db } = require("../utils/firebase");
 async function exchangeForLongLivedToken(accessToken, appId, appSecret) {
   try {
     const response = await axios.get(
-      `https://graph.facebook.com/v14.0/oauth/access_token`,
+      `https://graph.facebook.com/v22.0/oauth/access_token`,
       {
         params: {
           grant_type: "fb_exchange_token",
@@ -38,7 +38,7 @@ router.get("/facebook", (req, res) => {
     'ads_read'
   ].join(',');
   
-  const authUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${FACEBOOK_REDIRECT_URI}&scope=${scopes}`;
+  const authUrl = `https://www.facebook.com/v22.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${FACEBOOK_REDIRECT_URI}&scope=${scopes}`;
   res.redirect(authUrl);
 });
 
@@ -49,7 +49,7 @@ router.get("/facebook/callback", async (req, res) => {
   try {
     // 1. Get access token
     const tokenResponse = await axios.get(
-      `https://graph.facebook.com/v19.0/oauth/access_token`, {
+      `https://graph.facebook.com/v22.0/oauth/access_token`, {
         params: {
           client_id: FACEBOOK_APP_ID,
           client_secret: FACEBOOK_APP_SECRET,
@@ -68,10 +68,10 @@ router.get("/facebook/callback", async (req, res) => {
 
     // 3. Get pages and Instagram account
     const [pages, instagram] = await Promise.all([
-      axios.get(`https://graph.facebook.com/v19.0/me/accounts`, {
+      axios.get(`https://graph.facebook.com/v22.0/me/accounts`, {
         headers: { Authorization: `Bearer ${longLivedToken}` }
       }),
-      axios.get(`https://graph.facebook.com/v19.0/me?fields=instagram_business_account`, {
+      axios.get(`https://graph.facebook.com/v22.0/me?fields=instagram_business_account`, {
         headers: { Authorization: `Bearer ${longLivedToken}` }
       })
     ]);
@@ -160,7 +160,7 @@ router.get("/googleAdsense/callback", async (req, res) => {
 // Facebook OAuth Routes
 router.get("/facebook", (req, res) => {
   const { FACEBOOK_APP_ID, FACEBOOK_REDIRECT_URI } = process.env;
-  const authUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${FACEBOOK_REDIRECT_URI}&scope=pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,ads_read`;
+  const authUrl = `https://www.facebook.com/v22.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${FACEBOOK_REDIRECT_URI}&scope=pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,ads_read`;
   res.redirect(authUrl);
 });
 
@@ -170,7 +170,7 @@ router.get("/facebook/callback", async (req, res) => {
 
   try {
     const tokenResponse = await axios.get(
-      `https://graph.facebook.com/v14.0/oauth/access_token`,
+      `https://graph.facebook.com/v22.0/oauth/access_token`,
       {
         params: {
           client_id: FACEBOOK_APP_ID,
@@ -190,7 +190,7 @@ router.get("/facebook/callback", async (req, res) => {
     );
 
     const accountsResponse = await axios.get(
-      `https://graph.facebook.com/v14.0/me/accounts`,
+      `https://graph.facebook.com/v22.0/me/accounts`,
       {
         headers: {
           Authorization: `Bearer ${longLivedToken}`,

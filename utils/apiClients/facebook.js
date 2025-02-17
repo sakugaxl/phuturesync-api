@@ -9,7 +9,7 @@ const axios = require('axios');
  */
 const getInsights = async (accessToken, options = {}) => {
   try {
-    const url = `https://graph.facebook.com/v14.0/me/insights`;
+    const url = `https://graph.facebook.com/v22.0/me/insights`;
     const metrics = ["page_impressions", "page_engaged_users"]; // Example metrics
     const params = {
       metric: metrics.join(','), // Combine metrics into a single query parameter
