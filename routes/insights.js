@@ -1,3 +1,5 @@
+// routes/insights.js
+
 const express = require('express');
 const { db } = require('../utils/firebase'); // Firestore database instance
 const instagramClient = require('../utils/apiClients/instagram'); // Instagram API client

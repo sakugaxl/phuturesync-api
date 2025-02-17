@@ -1,3 +1,5 @@
+// routes/auth.js
+
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
@@ -23,6 +25,76 @@ async function exchangeForLongLivedToken(accessToken, appId, appSecret) {
     throw error;
   }
 }
+
+// Facebook OAuth Routes - UPDATED
+router.get("/facebook", (req, res) => {
+  const { FACEBOOK_APP_ID, FACEBOOK_REDIRECT_URI } = process.env;
+  const scopes = [
+    'pages_show_list',
+    'pages_read_engagement',
+    'pages_read_user_content',
+    'instagram_basic',
+    'instagram_manage_insights',
+    'ads_read'
+  ].join(',');
+  
+  const authUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${FACEBOOK_REDIRECT_URI}&scope=${scopes}`;
+  res.redirect(authUrl);
+});
+
+router.get("/facebook/callback", async (req, res) => {
+  const { code } = req.query;
+  const { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FRONTEND_URL } = process.env;
+
+  try {
+    // 1. Get access token
+    const tokenResponse = await axios.get(
+      `https://graph.facebook.com/v19.0/oauth/access_token`, {
+        params: {
+          client_id: FACEBOOK_APP_ID,
+          client_secret: FACEBOOK_APP_SECRET,
+          redirect_uri: process.env.FACEBOOK_REDIRECT_URI,
+          code
+        }
+      }
+    );
+
+    // 2. Get long-lived token
+    const longLivedToken = await exchangeForLongLivedToken(
+      tokenResponse.data.access_token,
+      FACEBOOK_APP_ID,
+      FACEBOOK_APP_SECRET
+    );
+
+    // 3. Get pages and Instagram account
+    const [pages, instagram] = await Promise.all([
+      axios.get(`https://graph.facebook.com/v19.0/me/accounts`, {
+        headers: { Authorization: `Bearer ${longLivedToken}` }
+      }),
+      axios.get(`https://graph.facebook.com/v19.0/me?fields=instagram_business_account`, {
+        headers: { Authorization: `Bearer ${longLivedToken}` }
+      })
+    ]);
+
+    // 4. Save to Firestore
+    const userId = req.session.userId; // Update with your auth system
+    await db.collection("users").doc(userId).set({
+      socialAccounts: {
+        facebook: {
+          accessToken: longLivedToken,
+          pages: pages.data.data,
+          instagramId: instagram.data.instagram_business_account?.id,
+          lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+        }
+      }
+    }, { merge: true });
+
+    res.redirect(`${FRONTEND_URL}/social?connected=facebook`);
+  } catch (error) {
+    console.error("Facebook error:", error.response?.data || error.message);
+    res.redirect(`${FRONTEND_URL}/auth-failure?code=facebook`);
+  }
+});
 
 // Google AdSense OAuth Routes
 router.get("/googleAdsense", (req, res) => {
@@ -88,7 +160,7 @@ router.get("/googleAdsense/callback", async (req, res) => {
 // Facebook OAuth Routes
 router.get("/facebook", (req, res) => {
   const { FACEBOOK_APP_ID, FACEBOOK_REDIRECT_URI } = process.env;
-  const authUrl = `https://www.facebook.com/v14.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${FACEBOOK_REDIRECT_URI}&scope=pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,ads_read`;
+  const authUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${FACEBOOK_REDIRECT_URI}&scope=pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,ads_read`;
   res.redirect(authUrl);
 });
 
