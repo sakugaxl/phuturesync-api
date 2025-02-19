@@ -9,7 +9,7 @@ const axios = require('axios');
  */
 const getInsights = async (accessToken, options = {}) => {
   try {
-    const url = `https://graph.instagram.com/v14.0/me/insights`;
+    const url = `https://graph.instagram.com/v22.0/me/insights`;
     const params = {
       metric: "follower_count,reach,impressions,profile_views,website_clicks", // Example metrics
       access_token: accessToken,
