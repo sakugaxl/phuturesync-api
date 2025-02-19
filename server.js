@@ -11,7 +11,10 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
-app.use(cors({ origin: "https://www.phuturesync.co.za" })); // Updated to production URL
+app.use(cors({
+  origin: ['https://www.phuturesync.co.za', 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Import Routes
